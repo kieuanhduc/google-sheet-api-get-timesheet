@@ -3,3 +3,4 @@ dist
 *.sh
 src/.env
 src/credentials.json
+src/node_modules
