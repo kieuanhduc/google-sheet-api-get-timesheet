@@ -33,24 +33,37 @@ export function parse_sheet_date_range(sheetName) {
 }
 
 export async function find_sheet_by_date_range(startDate, endDate) {
+    console.log("startDate", startDate);
+    console.log("endDate", endDate);
+
     const sheetNames = await get_sheet_names();
-    return sheetNames
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const matchingSheets = sheetNames
         .filter((name) => !name.includes("Thông tin tài khoản"))
         .map((name) => ({ name, ...parse_sheet_date_range(name) }))
         .filter(
             (sheet) =>
                 sheet.startDate &&
                 sheet.endDate &&
-                sheet.startDate <= new Date(endDate) &&
-                sheet.endDate >= new Date(startDate),
-        );
+                (
+                    (sheet.startDate <= end && sheet.endDate >= start) || // Overlapping date ranges
+                    (sheet.startDate >= start && sheet.endDate <= end)    // Sheet within the date range
+                )
+        )
+        .map(sheet => sheet.name); // Extract the sheet names
+
+    return matchingSheets;
 }
 
 export async function fetch_data_from_sheet(sheetNames) {
+    console.log("sheetNames", sheetNames);
     const authClient = await auth.getClient();
     const allData = [];
 
-    for (const { name: sheetName } of sheetNames) {
+    for (const sheetName of sheetNames) {
         try {
             const response = await sheets.spreadsheets.values.get({
                 auth: authClient,
@@ -62,7 +75,7 @@ export async function fetch_data_from_sheet(sheetNames) {
             if (rows && rows.length > 1) {
                 allData.push(
                     ...rows.slice(1)
-                        .filter(row => row[0] && row[0].trim() !== "") 
+                        .filter(row => row[0] && row[0].trim() !== "") // Filter out rows with empty date
                         .map((row) => ({
                             date: row[0],
                             project_name: row[1],
@@ -78,6 +91,7 @@ export async function fetch_data_from_sheet(sheetNames) {
             console.error(`Error fetching data from sheet ${sheetName}:`, error);
         }
     }
+
 
     return allData.sort((a, b) => new Date(b.date) - new Date(a.date));
 }

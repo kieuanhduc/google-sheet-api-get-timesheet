@@ -136,7 +136,7 @@ router.get(
         }
         const startDate = match[1];
         const endDate = match[2];
-        console.log({ startDate, endDate });
+
         try {
             const sheetNames = await find_sheet_by_date_range(
                 startDate,
