@@ -33,7 +33,7 @@ router.get("/hours-log/andrew/sheet/:dateRange.json", async (req, res) => {
             return res.status(400).json({ status: "no sheets found" });
         }
         const data = await fetch_data_from_sheet(sheetNames);
-        const filteredData = filter_data(data, { original_url: req.query.original_url });
+        const filteredData = filter_data(data, { original_url: ""});
         res.json({ total: filteredData.length, status: "success", data: filteredData });
     } catch (error) {
         console.error("Error fetching data:", error);
