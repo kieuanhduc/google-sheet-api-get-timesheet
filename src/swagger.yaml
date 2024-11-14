@@ -7,7 +7,8 @@ servers:
 
 tags:
   - name: Google Sheets API
-    description: API for fetching data from Google Sheets
+    description: API fetches data from Google Sheets, supports searching by date range and URL and original_url . Retrieve data from multiple sheets based on date
+
 
 paths:
   /hours-log/andrew/sheet/{dateRange}.json:
